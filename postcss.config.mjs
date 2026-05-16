@@ -1,3 +1,4 @@
+// TraceMon PostCSS Configuration
 const config = {
   plugins: {
     "@tailwindcss/postcss": {},
