@@ -1,48 +1,47 @@
 /**
  * TraceMon — Quantitative Risk & Performance Analysis Engine
  *
- * Bu modül, Hyperliquid / GMX / dYdX "Top Trader" davranış modellerini
- * baz alarak oluşturulmuş sentetik ama finansal olarak tutarlı bir
- * analiz motoru sağlar.
+ * This module provides a synthetic but financially consistent analysis engine
+ * based on Hyperliquid / GMX / dYdX "Top Trader" behavioral models.
  *
- * Referans veri kaynakları:
- *   - Hyperliquid Top 500 leaderboard (Ocak-Mayıs 2026 dönemi)
- *   - GMX Analytics: ortalama trader PnL dağılımları
- *   - dYdX v4 Season 5 trading competition verileri
+ * Reference data sources:
+ *   - Hyperliquid Top 500 leaderboard (Jan-May 2026 period)
+ *   - GMX Analytics: average trader PnL distributions
+ *   - dYdX v4 Season 5 trading competition data
  */
 
 import type { LeaderTrader } from "./mock-data";
 
 // ─────────────────────────────────────────────
-// 1. PERFORMANS & DAĞILIM ANALİZİ
+// 1. PERFORMANCE & DISTRIBUTION ANALYSIS
 // ─────────────────────────────────────────────
 
 /**
- * Win Rate vs PnL Korelasyonu
+ * Win Rate vs PnL Correlation
  *
- * Gerçek piyasa gözlemi (Hyperliquid Top 200, Ocak-Mayıs 2026):
+ * Real market observation (Hyperliquid Top 200, Jan-May 2026):
  *
- * | Win Rate Aralığı | Ortalama Toplam ROI | Trader Yüzdesi |
- * |------------------|---------------------|----------------|
- * | 80-95%           | +42%                | 8%             |
- * | 65-80%           | +127%               | 22%            |
- * | 50-65%           | +89%                | 35%            |
- * | 35-50%           | +156%               | 25%            |
- * | <35%             | -34%                | 10%            |
+ * | Win Rate Range | Average Total ROI | Trader Percentage |
+ * |----------------|-------------------|-------------------|
+ * | 80-95%         | +42%              | 8%                |
+ * | 65-80%         | +127%             | 22%               |
+ * | 50-65%         | +89%              | 35%               |
+ * | 35-50%         | +156%             | 25%               |
+ * | <35%           | -34%              | 10%               |
  *
- * Sonuç: Win Rate ≠ PnL. Risk/Ödül oranı (R:R) çok daha kritik.
+ * Conclusion: Win Rate ≠ PnL. Risk/Reward ratio (R:R) is far more critical.
  *
- * - %88 win rate, R:R 1:0.5 olan trader → düşük toplam PnL
- * - %48 win rate, R:R 1:3.2 olan trader → yüksek toplam PnL
+ * - 88% win rate, R:R 1:0.5 trader → low total PnL
+ * - 48% win rate, R:R 1:3.2 trader → high total PnL
  *
- * "Trend following" stratejileri düşük win rate + yüksek R:R ile
- * uzun vadede en iyi performansı gösteriyor.
+ * "Trend following" strategies with low win rate + high R:R
+ * deliver the best long-term performance.
  */
 
 export interface PerformanceProfile {
   type: "Conservative" | "Balanced" | "Aggressive" | "Degen";
   winRateRange: [number, number];
-  avgRR: number;          // Risk-Reward oranı
+  avgRR: number;          // Risk-Reward ratio
   avgWeeklyROI: number;
   maxDrawdownRange: [number, number];
   sharpeRatio: number;
@@ -57,7 +56,7 @@ export const performanceProfiles: PerformanceProfile[] = [
     avgWeeklyROI: 3.2,
     maxDrawdownRange: [1, 5],
     sharpeRatio: 2.4,
-    description: "Düşük hacim, yüksek isabetli. Küçük ama tutarlı kazançlar. Düşük kaldıraç (1-3x).",
+    description: "Low volume, high accuracy. Small but consistent gains. Low leverage (1-3x).",
   },
   {
     type: "Balanced",
@@ -66,7 +65,7 @@ export const performanceProfiles: PerformanceProfile[] = [
     avgWeeklyROI: 9.5,
     maxDrawdownRange: [5, 15],
     sharpeRatio: 1.8,
-    description: "Orta risk, optimize edilmiş R:R. Swing pozisyonlar. Kaldıraç 3-10x.",
+    description: "Moderate risk, optimized R:R. Swing positions. Leverage 3-10x.",
   },
   {
     type: "Aggressive",
@@ -75,7 +74,7 @@ export const performanceProfiles: PerformanceProfile[] = [
     avgWeeklyROI: 18.0,
     maxDrawdownRange: [15, 30],
     sharpeRatio: 1.1,
-    description: "Düşük win rate ama büyük kazançlar. Yüksek kaldıraç (10-25x). Trend takipçisi.",
+    description: "Low win rate but large gains. High leverage (10-25x). Trend follower.",
   },
   {
     type: "Degen",
@@ -84,32 +83,32 @@ export const performanceProfiles: PerformanceProfile[] = [
     avgWeeklyROI: -2.5,
     maxDrawdownRange: [30, 80],
     sharpeRatio: 0.3,
-    description: "Çok yüksek kaldıraç (25-100x). Likidasyon riski yüksek. Çoğu zarar eder.",
+    description: "Extremely high leverage (25-100x). High liquidation risk. Most end in loss.",
   },
 ];
 
 // ─────────────────────────────────────────────
-// 2. RISK SKORU (1-10) MATEMATİKSEL MODELİ
+// 2. RISK SCORE (1-10) MATHEMATICAL MODEL
 // ─────────────────────────────────────────────
 
 /**
  * Risk Score = Σ (Wi × Ni)
  *
- * Parametreler ve ağırlıklar:
+ * Parameters and weights:
  *
- * | Parametre               | Ağırlık (Wi) | Normalizasyon                      |
+ * | Parameter               | Weight (Wi)  | Normalization                      |
  * |-------------------------|--------------|-------------------------------------|
  * | Max Drawdown            | 0.35         | DD/50 × 10 (cap 10)                |
- * | Ort. Kaldıraç           | 0.25         | Leverage/50 × 10 (cap 10)          |
- * | Volatilite (Weekly ROI) | 0.20         | |WeeklyROI|/30 × 10 (cap 10)       |
- * | Win Rate (ters)         | 0.10         | (100 - WinRate)/60 × 10 (cap 10)   |
+ * | Avg Leverage            | 0.25         | Leverage/50 × 10 (cap 10)          |
+ * | Volatility (Weekly ROI) | 0.20         | |WeeklyROI|/30 × 10 (cap 10)       |
+ * | Win Rate (inverse)      | 0.10         | (100 - WinRate)/60 × 10 (cap 10)   |
  * | Trade Frequency         | 0.10         | Trades/10000 × 10 (cap 10)         |
  *
- * Skor Yorumu:
- *   1-3:  Düşük risk ("Conservative")
- *   4-6:  Orta risk ("Balanced")
- *   7-8:  Yüksek risk ("Aggressive")
- *   9-10: Çok yüksek risk ("Degen")
+ * Score Interpretation:
+ *   1-3:  Low risk ("Conservative")
+ *   4-6:  Medium risk ("Balanced")
+ *   7-8:  High risk ("Aggressive")
+ *   9-10: Very high risk ("Degen")
  */
 
 interface RiskWeights {
@@ -156,14 +155,14 @@ export function calculateRiskScore(trader: {
 }
 
 /**
- * Kaldıraç tahmini (leverage verisi yoksa)
- * Max Drawdown ve Weekly ROI volatilitesinden türetilir
+ * Leverage estimation (when leverage data is unavailable)
+ * Derived from Max Drawdown and Weekly ROI volatility
  */
 function estimateLeverage(trader: {
   maxDrawdown: number;
   weeklyROI: number;
 }): number {
-  // Ampirik formül: DD ve volatilite yüksekse kaldıraç yüksektir
+  // Empirical formula: higher DD and volatility implies higher leverage
   const volSignal = Math.abs(trader.weeklyROI) * 0.8;
   const ddSignal = trader.maxDrawdown * 0.6;
   return Math.min(Math.max((volSignal + ddSignal) / 2, 1), 100);
@@ -184,33 +183,33 @@ export function getRiskColor(score: number): string {
 }
 
 // ─────────────────────────────────────────────
-// 3. SLIPPAGE & GECİKME ANALİZİ
+// 3. SLIPPAGE & LATENCY ANALYSIS
 // ─────────────────────────────────────────────
 
 /**
- * Copy Trading Gecikme → Kayma İlişkisi
+ * Copy Trading Latency → Slippage Relationship
  *
- * Gerçek piyasa verileri ve ağ karşılaştırması:
+ * Real market data and network comparison:
  *
- * | Ağ        | Ort. Blok Süresi | Copy Gecikmesi | Kayma (Slippage) | Frontrun Riski |
- * |-----------|-----------------|----------------|------------------|----------------|
- * | Ethereum  | 12s             | 15-45s         | 0.8-3.5%         | Yüksek (MEV)   |
- * | Arbitrum  | 0.25s           | 2-8s           | 0.3-1.2%         | Orta           |
- * | Solana    | 0.4s            | 1-5s           | 0.2-0.8%         | Orta           |
- * | Monad     | 0.5s            | 0.5-2s         | 0.05-0.15%       | Düşük          |
+ * | Network   | Avg Block Time | Copy Delay | Slippage       | Frontrun Risk  |
+ * |-----------|---------------|------------|----------------|----------------|
+ * | Ethereum  | 12s           | 15-45s     | 0.8-3.5%       | High (MEV)     |
+ * | Arbitrum  | 0.25s         | 2-8s       | 0.3-1.2%       | Medium         |
+ * | Solana    | 0.4s          | 1-5s       | 0.2-0.8%       | Medium         |
+ * | Monad     | 0.5s          | 0.5-2s     | 0.05-0.15%     | Low            |
  *
- * Monad Avantajları:
- * 1. Paralel Execution: State conflict yok → copy trade aynı blokta
- * 2. 10,000 TPS: Yüksek throughput → slippage minimumda
- * 3. Isolated Vault: Her vault bağımsız → cross-contamination yok
+ * Monad Advantages:
+ * 1. Parallel Execution: No state conflicts → copy trade in the same block
+ * 2. 10,000 TPS: High throughput → slippage minimized
+ * 3. Isolated Vault: Each vault is independent → no cross-contamination
  *
- * Kayma Formülü:
+ * Slippage Formula:
  *   Slippage ≈ (TradeSize / PoolLiquidity) × (1 + LatencySeconds × 0.1)
  *
- * Monad'da $10K trade için ortalama kayma: ~$5-15 (0.05-0.15%)
- * Ethereum'da aynı trade: ~$80-350 (0.8-3.5%)
+ * Average slippage for a $10K trade on Monad: ~$5-15 (0.05-0.15%)
+ * Same trade on Ethereum: ~$80-350 (0.8-3.5%)
  *
- * → Monad, copy trading'de yıllık bazda takipçiye %12-25 daha fazla net getiri sağlar.
+ * → Monad delivers 12-25% higher net annual returns for copy trading followers.
  */
 
 export interface SlippageComparison {
@@ -258,17 +257,17 @@ export const slippageData: SlippageComparison[] = [
 ];
 
 // ─────────────────────────────────────────────
-// 4. TRADER ANALİZ FONKSİYONLARI
+// 4. TRADER ANALYSIS FUNCTIONS
 // ─────────────────────────────────────────────
 
 /**
- * Sharpe Ratio tahmini (basitleştirilmiş)
+ * Simplified Sharpe Ratio estimation
  * Sharpe = (Avg Weekly ROI - Risk Free Rate) / StdDev(Weekly ROI)
- * Risk-free weekly ≈ 0.08% (yıllık ~4%)
+ * Risk-free weekly ≈ 0.08% (~4% annualized)
  */
 export function estimateSharpe(weeklyROI: number, maxDrawdown: number): number {
   const riskFreeWeekly = 0.08;
-  // Volatilite tahmini: maxDD ile korelasyon
+  // Volatility estimate: correlated with maxDD
   const estimatedStdDev = maxDrawdown * 0.3;
   if (estimatedStdDev === 0) return 0;
   const sharpe = (weeklyROI - riskFreeWeekly) / estimatedStdDev;
@@ -276,9 +275,9 @@ export function estimateSharpe(weeklyROI: number, maxDrawdown: number): number {
 }
 
 /**
- * Sortino Ratio tahmini
+ * Sortino Ratio estimation
  * Sortino = (Avg Return - Risk Free) / Downside Deviation
- * Sadece negatif sapmayı dikkate alır → daha iyi risk ölçümü
+ * Only considers negative deviation → better risk measurement
  */
 export function estimateSortino(weeklyROI: number, maxDrawdown: number): number {
   const riskFreeWeekly = 0.08;
@@ -290,7 +289,7 @@ export function estimateSortino(weeklyROI: number, maxDrawdown: number): number 
 
 /**
  * Profit Factor = Gross Profit / Gross Loss
- * Win Rate ve R:R oranından türetilir
+ * Derived from Win Rate and R:R ratio
  */
 export function estimateProfitFactor(winRate: number, avgRR?: number): number {
   const rr = avgRR ?? estimateRR(winRate);
@@ -302,7 +301,7 @@ export function estimateProfitFactor(winRate: number, avgRR?: number): number {
 }
 
 function estimateRR(winRate: number): number {
-  // Ampirik: Yüksek win rate → düşük R:R, düşük win rate → yüksek R:R
+  // Empirical: high win rate → low R:R, low win rate → high R:R
   if (winRate >= 80) return 0.7;
   if (winRate >= 65) return 1.6;
   if (winRate >= 50) return 2.8;
@@ -310,7 +309,7 @@ function estimateRR(winRate: number): number {
 }
 
 /**
- * Tam trader analiz raporu
+ * Full trader analysis report
  */
 export interface TraderAnalysis {
   riskScore: number;
@@ -319,7 +318,7 @@ export interface TraderAnalysis {
   sortinoRatio: number;
   profitFactor: number;
   profile: PerformanceProfile;
-  copyScore: number; // 1-100 arası copy-worthiness skoru
+  copyScore: number; // 1-100 copy-worthiness score
 }
 
 export function analyzeTrader(trader: LeaderTrader): TraderAnalysis {
@@ -328,14 +327,14 @@ export function analyzeTrader(trader: LeaderTrader): TraderAnalysis {
   const sortino = estimateSortino(trader.weeklyROI, trader.maxDrawdown);
   const profitFactor = estimateProfitFactor(trader.winRate);
 
-  // Profil eşleştirme
+  // Profile matching
   const profile = performanceProfiles.find(
     (p) => trader.winRate >= p.winRateRange[0] && trader.winRate <= p.winRateRange[1]
   ) ?? performanceProfiles[1]; // default: Balanced
 
-  // Copy Score: Yüksek Sharpe + Düşük Risk + Yüksek PnL → iyi copy hedefi
+  // Copy Score: High Sharpe + Low Risk + High PnL → good copy target
   const sharpeNorm = Math.min(Math.max(sharpe, 0), 3) / 3; // 0-1
-  const riskNorm = 1 - (riskScore / 10); // 0-1 (düşük risk → yüksek skor)
+  const riskNorm = 1 - (riskScore / 10); // 0-1 (low risk → high score)
   const pnlNorm = Math.min(Math.max(trader.totalPnL, 0), 500000) / 500000;
   const followerNorm = Math.min(trader.followers, 5000) / 5000;
 
@@ -355,47 +354,47 @@ export function analyzeTrader(trader: LeaderTrader): TraderAnalysis {
 }
 
 // ─────────────────────────────────────────────
-// 5. JÜRI PITCH İSTATİSTİKLERİ
+// 5. PITCH STATISTICS
 // ─────────────────────────────────────────────
 
 export const pitchStats = {
-  headline: "Monad'da Copy Trading: Rakamlarla Fark",
+  headline: "Copy Trading on Monad: The Difference in Numbers",
   stats: [
     {
-      metric: "Ortalama Kayma Tasarrufu",
+      metric: "Average Slippage Savings",
       value: "93%",
-      detail: "Monad vs Ethereum: $260 vs $4,200 yıllık kayma maliyeti ($100K portföy)",
+      detail: "Monad vs Ethereum: $260 vs $4,200 annual slippage cost ($100K portfolio)",
     },
     {
-      metric: "Copy Gecikmesi",
+      metric: "Copy Delay",
       value: "<1s",
-      detail: "Monad paralel execution ile lider-takipçi arası gecikme 0.5-2 saniye",
+      detail: "Monad parallel execution reduces leader-follower delay to 0.5-2 seconds",
     },
     {
-      metric: "Frontrunning Koruması",
+      metric: "Frontrunning Protection",
       value: "99.2%",
-      detail: "Isolated vault mimarisi sayesinde MEV/sandwich attack riski neredeyse sıfır",
+      detail: "Isolated vault architecture makes MEV/sandwich attack risk near zero",
     },
     {
-      metric: "Takipçi Net Getiri Farkı",
+      metric: "Follower Net Return Advantage",
       value: "+18.7%",
-      detail: "Monad takipçileri, Ethereum copy trader'larına göre yıllık %18.7 daha fazla kazanır",
+      detail: "Monad followers earn 18.7% more annually compared to Ethereum copy traders",
     },
     {
       metric: "Risk-Adjusted Return (Sharpe)",
       value: "1.8x",
-      detail: "Platform ortalama Sharpe Ratio: geleneksel copy platformlarının 1.8 katı",
+      detail: "Platform average Sharpe Ratio: 1.8x that of traditional copy platforms",
     },
   ],
   keyInsight:
-    "Win Rate tek başına başarıyı belirlemez. Platformumuzdaki en kârlı trader'ların %60'ı " +
-    "50-70% win rate aralığında, ancak Risk/Ödül oranları 2.5x+ seviyesindedir. " +
-    "TraceMon'un Risk Score algoritması bu dengeyi yakalayarak kullanıcılara " +
-    "gerçek alfa sağlayan trader'ları öne çıkarır.",
+    "Win rate alone does not determine success. 60% of the most profitable traders on our platform " +
+    "have a 50-70% win rate, but maintain Risk/Reward ratios above 2.5x. " +
+    "TraceMon's Risk Score algorithm captures this balance, surfacing traders " +
+    "who deliver real alpha for followers.",
 };
 
 // ─────────────────────────────────────────────
-// 6. CHART VERİ ÜRETİCİLERİ (recharts için)
+// 6. CHART DATA GENERATORS (for recharts)
 // ─────────────────────────────────────────────
 
 export function generateWinRateVsPnlData() {
