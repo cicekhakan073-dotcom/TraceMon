@@ -10,17 +10,177 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Monad Brand Colors */
+  --color-primary: #836EF9;
+  --color-primary-hover: #9580FF;
+  --color-secondary: #1A1B23;
+  --color-accent: #00D4AA;
+  --color-danger: #FF4757;
+  --color-surface: #12131A;
+  --color-surface-light: #1E1F2E;
+  --color-border: #2A2B3A;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #0A0B0F;
     --foreground: #ededed;
   }
+}
+
+.dark {
+  --background: #0A0B0F;
+  --foreground: #ededed;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.ticker-scroll {
+  animation: tickerScroll 40s linear infinite;
+}
+
+.ticker-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* Utility classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Glassmorphism */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.04), 0 0 40px rgba(131, 110, 249, 0.04);
+}
+
+.glass-card-hover {
+  transition: all 0.25s ease;
+}
+
+.glass-card-hover:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: scale(1.01);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.06), 0 0 60px rgba(131, 110, 249, 0.08);
+}
+
+.glass-glow {
+  box-shadow: 0 0 40px rgba(131, 110, 249, 0.06);
+}
+
+/* Animated gradient border */
+@keyframes borderRotate {
+  0% { --border-angle: 0deg; }
+  100% { --border-angle: 360deg; }
+}
+
+@property --border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.animated-border {
+  position: relative;
+  isolation: isolate;
+}
+
+.animated-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--border-angle), var(--border-c1), var(--border-c2), var(--border-c3), var(--border-c1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: borderRotate 8s linear infinite;
+}
+
+.animated-border-gold {
+  --border-c1: #facc15;
+  --border-c2: #f59e0b;
+  --border-c3: #ca8a04;
+}
+
+.animated-border-silver {
+  --border-c1: #d4d4d8;
+  --border-c2: #a1a1aa;
+  --border-c3: #71717a;
+}
+
+.animated-border-bronze {
+  --border-c1: #fb923c;
+  --border-c2: #d97706;
+  --border-c3: #c2410c;
+}
+
+.animated-border-primary {
+  --border-c1: #836EF9;
+  --border-c2: #00D4AA;
+  --border-c3: #836EF9;
+}
+
+/* Gradient border line (for stats bar) */
+.gradient-border-top {
+  position: relative;
+}
+.gradient-border-top::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(131, 110, 249, 0.4), transparent);
+}
+.gradient-border-top::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(131, 110, 249, 0.2), transparent);
 }
