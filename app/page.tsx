@@ -8,9 +8,6 @@ import {
   Layers,
   DollarSign,
   BarChart3,
-  Search,
-  SlidersHorizontal,
-  Copy,
 } from "lucide-react";
 import { CountUp } from "./components/CountUp";
 import { LiveTicker } from "./components/LiveTicker";
@@ -22,26 +19,6 @@ const stats = [
   { icon: BarChart3, value: "Real-time", label: "Analytics", desc: "MonadDb powered" },
 ];
 
-const steps = [
-  {
-    icon: Search,
-    title: "Choose a Leader",
-    desc: "Browse the leaderboard and find top-performing traders with verified track records.",
-    step: "01",
-  },
-  {
-    icon: SlidersHorizontal,
-    title: "Set Your Limits",
-    desc: "Define your risk tolerance, max slippage, stop-loss, and capital allocation.",
-    step: "02",
-  },
-  {
-    icon: Copy,
-    title: "Auto-Copy Trades",
-    desc: "When a leader opens a position, your isolated vault mirrors the trade in parallel — instantly.",
-    step: "03",
-  },
-];
 
 export default function Home() {
   return (
@@ -117,42 +94,6 @@ export default function Home() {
 
         {/* Live Ticker */}
         <LiveTicker />
-
-        {/* How It Works */}
-        <section id="how-it-works" className="animate-fade-in-up py-24 sm:py-32">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold text-white sm:text-4xl">
-                How It Works
-              </h2>
-              <p className="mt-4 text-lg text-zinc-400">
-                Start copy trading in three simple steps
-              </p>
-            </div>
-
-            <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {steps.map((step) => (
-                <div
-                  key={step.step}
-                  className="group glass-card glass-card-hover relative rounded-2xl p-8 hover:border-primary/30"
-                >
-                  <div className="absolute -top-4 right-6 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
-                    Step {step.step}
-                  </div>
-                  <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
-                    <step.icon size={24} className="text-primary" />
-                  </div>
-                  <h3 className="mb-3 text-lg font-semibold text-white">
-                    {step.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed text-zinc-400">
-                    {step.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* CTA */}
         <section className="border-t border-border py-24 sm:py-32">

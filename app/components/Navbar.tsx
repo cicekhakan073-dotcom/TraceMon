@@ -8,7 +8,7 @@ import { useState } from "react";
 const navLinks = [
   { label: "Leaderboard", href: "/leaderboard" },
   { label: "Dashboard", href: "/dashboard" },
-  { label: "How It Works", href: "#how-it-works" },
+  { label: "Analytics", href: "/analytics" },
 ];
 
 function WalletButton() {
