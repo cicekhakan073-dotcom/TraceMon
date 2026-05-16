@@ -14,19 +14,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TradeWatch | Parallel Copy Trading on Monad",
+  title: "TraceMon | Parallel Copy Trading on Monad",
   description:
     "Decentralized parallel mirror trading protocol powered by Monad's 10,000 TPS execution engine. Copy top traders instantly with isolated vaults and zero state conflicts.",
   openGraph: {
-    title: "TradeWatch | Parallel Copy Trading on Monad",
+    title: "TraceMon | Parallel Copy Trading on Monad",
     description:
       "Copy top traders instantly with Monad's 10,000 TPS parallel execution. Isolated vaults, real-time analytics, zero state conflicts.",
     type: "website",
-    siteName: "TradeWatch",
+    siteName: "TraceMon",
   },
   twitter: {
     card: "summary_large_image",
-    title: "TradeWatch | Parallel Copy Trading on Monad",
+    title: "TraceMon | Parallel Copy Trading on Monad",
     description:
       "Copy top traders instantly with Monad's 10,000 TPS parallel execution.",
   },

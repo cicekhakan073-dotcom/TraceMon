@@ -1,4 +1,4 @@
-# TradeWatch
+# TraceMon
 
 **Decentralized parallel copy trading protocol built on Monad.**
 
@@ -18,7 +18,7 @@ Copy trading in DeFi is fundamentally broken:
 
 ## Solution
 
-TradeWatch solves these problems by leveraging Monad's parallel execution engine:
+TraceMon solves these problems by leveraging Monad's parallel execution engine:
 
 1. **Parallel copy execution.** Leader and follower trades execute in the same block with zero state conflicts, reducing copy delay to under 1 second.
 2. **Isolated Vault Architecture.** Each follower's capital is held in an independent smart contract vault, eliminating cross-contamination and making sandwich attacks economically unviable.
@@ -118,8 +118,8 @@ A composite metric combining Sharpe Ratio (30%), inverse Risk Score (25%), total
 
 ```bash
 # 1. Clone
-git clone https://github.com/pofishe/TradeWatch.git
-cd TradeWatch
+git clone https://github.com/cicekhakan073-dotcom/TraceMon.git
+cd TraceMon
 
 # 2. Install dependencies
 npm install --legacy-peer-deps

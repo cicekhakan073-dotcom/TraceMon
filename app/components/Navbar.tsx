@@ -96,7 +96,7 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <span className="text-xl font-bold text-white">
-            Trade<span className="text-primary">Watch</span>
+            Trace<span className="text-primary">Mon</span>
           </span>
         </Link>
 

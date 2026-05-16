@@ -69,7 +69,7 @@ export default function Home() {
               </h1>
 
               <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-zinc-400 sm:text-xl">
-                TradeWatch leverages Monad&apos;s 10,000 TPS parallel execution to
+                TraceMon leverages Monad&apos;s 10,000 TPS parallel execution to
                 mirror top traders&apos; strategies — instantly, with zero state
                 conflicts.
               </p>

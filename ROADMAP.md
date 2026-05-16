@@ -1,4 +1,4 @@
-# TradeWatch - Vibe Coding Roadmap
+# TraceMon - Vibe Coding Roadmap
 
 > Monad Hackathon MVP - Faz faz geliştirme rehberi
 > Her fazda ilgili prompt'u kopyala, Claude'a yapıştır, sonucu kontrol et, sonraki faza geç.
@@ -69,7 +69,7 @@ app/config/wagmi.ts dosyasını oluştur:
    - Providers component'ini ekle
    - Font olarak Inter veya Geist kullan
    - HTML'de dark class ekle
-   - Sayfa title: "TradeWatch | Parallel Copy Trading on Monad"
+   - Sayfa title: "TraceMon | Parallel Copy Trading on Monad"
 ```
 
 ---
@@ -81,21 +81,21 @@ app/config/wagmi.ts dosyasını oluştur:
 ### Prompt 1.1 - Hero Section ve Layout
 
 ```
-app/page.tsx dosyasını sıfırdan yaz. TradeWatch için etkileyici bir landing page oluştur.
+app/page.tsx dosyasını sıfırdan yaz. TraceMon için etkileyici bir landing page oluştur.
 
 Genel tasarım: Koyu tema, Monad mor (#836EF9) vurgulu, modern DeFi protokol estetiği.
 
 Bileşenler:
 
 1. Navbar (app/components/Navbar.tsx):
-   - Sol: TradeWatch logosu (text logo yeterli, kalın font)
+   - Sol: TraceMon logosu (text logo yeterli, kalın font)
    - Orta: Linkler -> "Leaderboard", "How It Works", "Docs" (hepsi # link)
    - Sağ: RainbowKit ConnectButton (cüzdan bağla butonu)
    - Sticky, blur arkaplan (backdrop-blur)
 
 2. Hero Section:
    - Büyük başlık: "Copy the Best. Trade in Parallel."
-   - Alt başlık: "TradeWatch leverages Monad's 10,000 TPS parallel execution to mirror top traders' strategies — instantly, with zero state conflicts."
+   - Alt başlık: "TraceMon leverages Monad's 10,000 TPS parallel execution to mirror top traders' strategies — instantly, with zero state conflicts."
    - CTA butonları: "Start Copying" (mor, parlak) ve "Become a Leader" (outline)
    - Sağ tarafta veya altta: Basit bir animasyonlu görsel veya grid pattern
 

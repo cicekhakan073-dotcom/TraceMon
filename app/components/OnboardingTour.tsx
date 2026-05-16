@@ -12,7 +12,7 @@ interface TourStep {
 const steps: TourStep[] = [
   {
     selector: '[href="/leaderboard"]',
-    title: "Welcome to TradeWatch!",
+    title: "Welcome to TraceMon!",
     description: "Browse top traders on the leaderboard and find who to copy.",
     position: "bottom",
   },

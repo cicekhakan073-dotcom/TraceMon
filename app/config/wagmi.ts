@@ -25,7 +25,7 @@ export const monadTestnet = defineChain({
 });
 
 export const config = getDefaultConfig({
-  appName: "TradeWatch",
+  appName: "TraceMon",
   projectId: process.env.NEXT_PUBLIC_WC_PROJECT_ID || "04b0796895f8fcdb63e1b76e9e1a33f4",
   chains: [monadTestnet],
   transports: {

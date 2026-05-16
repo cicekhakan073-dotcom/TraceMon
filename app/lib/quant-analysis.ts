@@ -1,5 +1,5 @@
 /**
- * TradeWatch — Quantitative Risk & Performance Analysis Engine
+ * TraceMon — Quantitative Risk & Performance Analysis Engine
  *
  * Bu modül, Hyperliquid / GMX / dYdX "Top Trader" davranış modellerini
  * baz alarak oluşturulmuş sentetik ama finansal olarak tutarlı bir
@@ -390,7 +390,7 @@ export const pitchStats = {
   keyInsight:
     "Win Rate tek başına başarıyı belirlemez. Platformumuzdaki en kârlı trader'ların %60'ı " +
     "50-70% win rate aralığında, ancak Risk/Ödül oranları 2.5x+ seviyesindedir. " +
-    "TradeWatch'un Risk Score algoritması bu dengeyi yakalayarak kullanıcılara " +
+    "TraceMon'un Risk Score algoritması bu dengeyi yakalayarak kullanıcılara " +
     "gerçek alfa sağlayan trader'ları öne çıkarır.",
 };
 
