@@ -21,16 +21,34 @@ export interface LeaderTrader {
   riskScore?: number;  // 1-10
 }
 
+// Pre-computed sparklines to avoid hydration mismatch (Math.random differs server vs client)
+const sparklines = {
+  up1: [100, 108.2, 112.5, 119.3, 115.8, 124.1, 131.6],
+  up2: [100, 104.7, 111.9, 116.4, 122.8, 118.3, 127.5],
+  up3: [100, 106.1, 103.8, 112.4, 118.9, 125.2, 130.1],
+  up4: [100, 107.3, 114.6, 110.2, 119.8, 126.4, 133.7],
+  up5: [100, 103.4, 109.1, 115.7, 121.3, 124.8, 129.2],
+  up6: [100, 105.8, 112.3, 108.9, 117.4, 123.6, 128.9],
+  down1: [100, 95.3, 89.7, 84.2, 87.1, 79.6, 73.8],
+  volatile1: [100, 115.2, 98.7, 121.4, 105.3, 88.9, 112.6],
+  volatile2: [100, 87.3, 108.5, 94.1, 118.7, 102.4, 95.8],
+  volatile3: [100, 112.8, 95.4, 107.2, 89.6, 114.3, 103.1],
+};
+
+let sparklineIndex = 0;
 function generateSparkline(trend: "up" | "down" | "volatile"): number[] {
-  const points: number[] = [];
-  let value = 100;
-  for (let i = 0; i < 7; i++) {
-    if (trend === "up") value += Math.random() * 15 - 3;
-    else if (trend === "down") value += Math.random() * 10 - 12;
-    else value += Math.random() * 30 - 15;
-    points.push(Math.round(value * 100) / 100);
+  const upKeys = ["up1", "up2", "up3", "up4", "up5", "up6"] as const;
+  const volatileKeys = ["volatile1", "volatile2", "volatile3"] as const;
+
+  if (trend === "down") return sparklines.down1;
+  if (trend === "volatile") {
+    const key = volatileKeys[sparklineIndex % volatileKeys.length];
+    sparklineIndex++;
+    return sparklines[key];
   }
-  return points;
+  const key = upKeys[sparklineIndex % upKeys.length];
+  sparklineIndex++;
+  return sparklines[key];
 }
 
 // Real-world inspired data based on Hyperliquid / GMX / dYdX top trader patterns
